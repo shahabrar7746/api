@@ -24,6 +24,11 @@ public class consumerController {
 		
 		return service.findAllConsumers();
 	}
+	@GetMapping("/")
+	public String status(){
+		
+		return "Im up!!";
+	}
 	
 	@PostMapping("/updateLocation")
 	public ResponseEntity<String> changeLocation(@RequestBody changeLocation location) {
