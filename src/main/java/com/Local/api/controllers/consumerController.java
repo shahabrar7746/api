@@ -35,7 +35,7 @@ public class consumerController {
 	}
 	
 	@GetMapping(path = "/updateLocation/{id}/{location}")
-	public ResponseEntity<String> changeLocation(@PathVariable("id") String id, @PathVariable("location") String location) {
+	public String changeLocation(@PathVariable("id") String id, @PathVariable("location") String location) {
 		
 		 changeLocation locationObj = new changeLocation();
 		 locationObj.id = id;
