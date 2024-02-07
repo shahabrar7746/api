@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -32,8 +34,13 @@ public class consumerController {
 		return "Im up!!";
 	}
 	
-	@PostMapping(path = "/updateLocation" , consumes = "application/json")
-	public ResponseEntity<String> changeLocation(@RequestBody changeLocation location) {
-		return service.changeLocation(location);
+	@PutMapping(path = "/updateLocation/{id}/{location}" , consumes = "application/json")
+	public ResponseEntity<String> changeLocation(@PathVariable("id") String id, @PathVariable("location") String location) {
+		
+		 changeLocation locationObj = new changeLocation();
+		 locationObj.id = id;
+		 locationObj.newLocation = location;
+		 
+		return service.changeLocation(locationObj);
 	}
 }
