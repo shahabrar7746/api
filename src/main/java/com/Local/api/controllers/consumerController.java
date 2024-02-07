@@ -34,7 +34,7 @@ public class consumerController {
 		return "Im up!!";
 	}
 	
-	@PutMapping(path = "/updateLocation/{id}/{location}" , consumes = "application/json")
+	@PutMapping(path = "/updateLocation/{id}/{location}")
 	public ResponseEntity<String> changeLocation(@PathVariable("id") String id, @PathVariable("location") String location) {
 		
 		 changeLocation locationObj = new changeLocation();
