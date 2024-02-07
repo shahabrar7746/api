@@ -32,7 +32,7 @@ public class consumerController {
 		return "Im up!!";
 	}
 	
-	@PostMapping(path = "/updateLocation" , consumes = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(path = "/updateLocation" , consumes = "application/json")
 	public ResponseEntity<String> changeLocation(@RequestBody changeLocation location) {
 		return service.changeLocation(location);
 	}
