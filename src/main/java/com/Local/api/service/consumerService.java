@@ -25,18 +25,19 @@ public class consumerService {
 		return repo.findAll();
 	}
 	
-	public String changeLocation(com.Local.api.entities.changeLocation location){
+	public ResponseEntity<String>  changeLocation(com.Local.api.entities.changeLocation location){
 		
 		try {
 		consumerdetails consumer  =  repo.findById(location.id).get();
 		consumer.consumer_location = location.newLocation;
 		repo.save(consumer);
 		
-		return "Successfull";
+		
+		return ResponseEntity.ok("Successfull") ;
 		}catch(Exception e) {
 			
 		}
 		
-		return "bad request";
+		return (ResponseEntity<String>) ResponseEntity.badRequest();
 	}
 }
