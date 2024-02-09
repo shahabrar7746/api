@@ -22,7 +22,7 @@ public class sellerController {
 	public List<sellerdetails> findAllSeller(){
 		return service.findAllSeller();
 	}
-	@GetMapping("/service")
+	@PostMapping("/service")
 	public List<sellerdetails> getServices(@RequestBody serviceRequest request){
 		return service.getService(request);
 	}
