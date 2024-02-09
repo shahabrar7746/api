@@ -1,4 +1,4 @@
-package com.Local.api.entities;
+package com.Local.api.model;
 
 import lombok.Data;
 

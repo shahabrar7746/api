@@ -1,6 +1,7 @@
 package com.Local.api.service;
 
 import java.util.List;
+import 	 com.Local.api.model.changeLocation;
 import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ public class consumerService {
 		return repo.findAll();
 	}
 	
-	public ResponseEntity<String>  changeLocation(com.Local.api.entities.changeLocation location){
+	public ResponseEntity<String>  changeLocation(changeLocation location){
 		
 		try {
 		consumerdetails consumer  =  repo.findById(location.id).get();

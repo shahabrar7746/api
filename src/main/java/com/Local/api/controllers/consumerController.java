@@ -3,6 +3,7 @@ package com.Local.api.controllers;
 
 import java.util.List;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.Local.api.service.consumerService;
 import com.Local.api.entities.*;
-
+import 	 com.Local.api.model.changeLocation;
 @RestController
 public class consumerController {
 
@@ -37,10 +38,12 @@ public class consumerController {
 	@GetMapping(path = "/updateLocation/{id}/{location}")
 	public ResponseEntity<String> changeLocation(@PathVariable("id") String id, @PathVariable("location") String location) {
 		
-		 changeLocation locationObj = new changeLocation();
+	changeLocation locationObj = new changeLocation();
 		 locationObj.id = id;
 		 locationObj.newLocation = location;
 		 
 		return service.changeLocation(locationObj);
 	}
+	
+	
 }

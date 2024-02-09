@@ -8,4 +8,6 @@ import com.Local.api.entities.consumerdetails;
 @Repository
 public interface consumerRepo extends JpaRepository<consumerdetails,String> {
 
+	
+	
 }
