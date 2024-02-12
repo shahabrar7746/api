@@ -51,4 +51,10 @@ public class consumerController {
 	}
 	
 	
+	@GetMapping("/resetPassword/{email}")
+	public String reset(@PathVariable("email") String email) {
+		return service.sendMail(email);
+	}
+	
+	
 }
