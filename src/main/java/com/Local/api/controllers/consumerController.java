@@ -4,6 +4,7 @@ package com.Local.api.controllers;
 import java.util.List;
 
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -13,8 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import com.Local.api.model.login;
 
 import com.Local.api.service.consumerService;
+import com.Local.api.Exceptions.customError;
 import com.Local.api.entities.*;
 import 	 com.Local.api.model.changeLocation;
 @RestController
@@ -38,7 +41,7 @@ public class consumerController {
 	
 	
 	@PostMapping(path = "/register/consumer")
-	public consumerdetails register(@RequestBody consumerdetails newConsumer) {
+	public consumerdetails register(@RequestBody consumerdetails newConsumer) throws customError {
 		newConsumer.consumer_id = service.generateId();
 		newConsumer.registration_date = service.getDate();
 	    return service.save(newConsumer);	
@@ -52,8 +55,13 @@ public class consumerController {
 	
 	
 	@GetMapping("/resetPassword/{email}")
-	public String reset(@PathVariable("email") String email) {
+	public ResponseEntity<String> reset(@PathVariable("email") String email) throws customError {
 		return service.sendMail(email);
+	}
+	
+	@GetMapping("/login")
+	public ResponseEntity<String> login(@RequestBody login logUser) throws customError{
+		return service.doLogin(logUser);
 	}
 	
 	

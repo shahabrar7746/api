@@ -6,14 +6,16 @@ import java.util.List;
 import java.util.Random;
 
 import 	 com.Local.api.model.changeLocation;
-
+import com.Local.api.model.login;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.*;
 import org.springframework.stereotype.Service;
 
+import com.Local.api.Exceptions.customError;
 import com.Local.api.entities.consumerdetails;
 import com.Local.api.repository.consumerRepo;
 
@@ -48,7 +50,11 @@ public class consumerService {
 		
 		return (ResponseEntity<String>) ResponseEntity.badRequest();
 	}
-	public consumerdetails save(consumerdetails newConsumer) {
+	public consumerdetails save(consumerdetails newConsumer) throws customError {
+		consumerdetails consumer = repo.findByemail(newConsumer.email);
+		if(consumer != null) {
+			throw new customError("Email already in use",HttpStatus.NOT_ACCEPTABLE);
+		}
 		repo.save(newConsumer);
 		return newConsumer;
 	}
@@ -80,30 +86,39 @@ public class consumerService {
 		Random rand = new Random();
 		String num = "1234567890";
 		String otp = "";
-		for(int i = 0;i<4;i++) {
+		for(int i = 0;i<6;i++) {
 			otp = otp + rand.nextInt(num.length());
 		}
 		return otp;
 	}
-	public String sendMail(String email) {
+	public ResponseEntity<String> sendMail(String email) throws customError{
 		String otp = getOtp();
 		
 		consumerdetails consumer = repo.findByemail(email);
 		if(consumer == null) {
-			return "incorrect email";
+			throw new customError("invalid or incorrect email", HttpStatus.BAD_REQUEST);
 		}
 		  SimpleMailMessage message = new SimpleMailMessage();
 	        message.setTo(email);
 	        
 	        message.setSubject("OTP for resetting your 24Local Private Limited account password\"");
-	        message.setText("Hi \" + Dear User +\",\\n\"\r\n"
-	        		+ "        		+ \"Your OTP for 24Local Private Limited is \" + "+ otp + " + \" \\n\"\r\n"
-	        		+ "        				+ \"Please enter this code in the app or on the website to verify your identity.\\n\" + \"\"\r\n"
-	        		+ "        						+ \"This OTP is valid for 10 minutes. If you do not use it within that time, a new OTP will be generated.\\r\\n\"\r\n"
-	        		+ "        						+ \"\\r\\n\"\r\n"
-	        		+ "        						+ \"If you did not request this OTP, please ignore this email.\\n\"\r\n"
-	        		+ "        						+\"Thanks,\\n\"\r\n"
-	        		+ "        						+ \"The 24Local Team\"");
-	        return otp;
+	        message.setText("Hi Dear User Your OTP for 24Local Private Limited is "  + otp + 
+	        		      				"\nPlease enter this code in the app or on the website to verify your identity.\n"
+	        					+ "This OTP is valid for 10 minutes. If you do not use it within that time, a new OTP will be generated.\n"
+	        								+ "\n"
+	        		       						+ "If you did not request this OTP, please ignore this email.\n"
+	        		        						+ "Thanks, \n" +
+	        		       						"The 24Local Team");
+	        emailSender.send(message);
+	       
+			return ResponseEntity.ok(otp);
+	}
+	
+	public ResponseEntity<String> doLogin(login logUser) throws customError{
+		consumerdetails consumer = repo.findByemail(logUser.emailORnumber);
+		if(consumer == null) {
+			throw new customError("No User found",HttpStatus.BAD_GATEWAY);
+		}
+		return  ResponseEntity.ok(consumer.consumer_id);
 	}
 }
