@@ -35,21 +35,19 @@ public class consumerController {
 		return "Im up!!";
 	}
 	
-	@GetMapping(path = "/updateLocation/{id}/{location}")
-	public ResponseEntity<String> changeLocation(@PathVariable("id") String id, @PathVariable("location") String location) {
-		
-	changeLocation locationObj = new changeLocation();
-		 locationObj.id = id;
-		 locationObj.newLocation = location;
-		 
-		return service.changeLocation(locationObj);
-	}
+	
 	
 	@PostMapping(path = "/register/consumer")
 	public consumerdetails register(@RequestBody consumerdetails newConsumer) {
 		newConsumer.consumer_id = service.generateId();
 		newConsumer.registration_date = service.getDate();
 	    return service.save(newConsumer);	
+	}
+	
+	
+	@PutMapping("/changeLocation")
+	public ResponseEntity<String> updateLocation(@RequestBody changeLocation newLocation){
+		return service.changeLocation(newLocation);
 	}
 	
 	
