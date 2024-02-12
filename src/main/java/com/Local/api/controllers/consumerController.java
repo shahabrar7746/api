@@ -45,5 +45,12 @@ public class consumerController {
 		return service.changeLocation(locationObj);
 	}
 	
+	@PostMapping(path = "/register/consumer")
+	public consumerdetails register(@RequestBody consumerdetails newConsumer) {
+		newConsumer.consumer_id = service.generateId();
+		newConsumer.registration_date = service.getDate();
+	    return service.save(newConsumer);	
+	}
+	
 	
 }
