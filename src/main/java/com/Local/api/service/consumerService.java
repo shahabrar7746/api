@@ -1,6 +1,7 @@
 package com.Local.api.service;
 
 import java.time.LocalDate;
+
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
@@ -53,7 +54,7 @@ public class consumerService {
 	public consumerdetails save(consumerdetails newConsumer) throws customError {
 		consumerdetails consumer = repo.findByemail(newConsumer.email);
 		if(consumer != null) {
-			throw new customError("Email already in use",HttpStatus.NOT_ACCEPTABLE);
+			throw new customError("Email already in use",HttpStatus.CONFLICT);
 		}
 		repo.save(newConsumer);
 		return newConsumer;
@@ -117,7 +118,8 @@ public class consumerService {
 	public ResponseEntity<String> doLogin(login logUser) throws customError{
 		consumerdetails consumer = repo.findByemail(logUser.emailORnumber);
 		if(consumer == null) {
-			throw new customError("No User found",HttpStatus.BAD_GATEWAY);
+			
+			throw new customError("No User found",HttpStatus.NOT_FOUND);
 		}
 		return  ResponseEntity.ok(consumer.consumer_id);
 	}

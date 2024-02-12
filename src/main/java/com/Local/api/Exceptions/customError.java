@@ -11,11 +11,12 @@ public class customError extends Exception {
 	public customError(String message,HttpStatus status) {
 		super(message);
 		this.status = status;
+		code = status.value();
 		
 		
 	}
 	
-	
+	public int code; 
 	private HttpStatus status = HttpStatus.BAD_REQUEST;
 	public HttpStatus getStatus() {
 		return status;
