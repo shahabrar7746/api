@@ -1,8 +1,4 @@
 package com.Local.api.model;
-import org.springframework.*;
-import org.springframework.context.annotation.Bean;
-
-import lombok.Data;
 
 
 
