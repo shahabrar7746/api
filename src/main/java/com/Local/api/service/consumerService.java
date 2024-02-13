@@ -76,6 +76,8 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		
 	}
 	public consumerdetails register(consumerdetails newConsumer) throws customError {
+		newConsumer.consumer_id = generateId();
+		newConsumer.registration_date = getDate();
 		consumerdetails consumer = repo.findByemail(newConsumer.email);
 		if(consumer != null) {
 			throw new customError(EMAIL_IN_USE,HttpStatus.CONFLICT);
@@ -94,7 +96,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	      
 	        return dateString;
 	}
-	private String generateId() {
+	public String generateId() {
 		String consumerId = null;
 	       StringBuilder uniqueString = new StringBuilder();
 

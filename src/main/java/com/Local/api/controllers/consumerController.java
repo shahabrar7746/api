@@ -42,8 +42,7 @@ public class consumerController {
 	
 	@PostMapping(path = "/register/consumer")
 	public consumerdetails register(@RequestBody consumerdetails newConsumer) throws customError {
-		newConsumer.consumer_id = service.generateId();
-		newConsumer.registration_date = service.getDate();
+		
 	    return service.register(newConsumer);	
 	}
 	
