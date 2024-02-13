@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import com.Local.api.model.login;
-
+import com.Local.api.model.otp;
 import com.Local.api.service.consumerService;
 import com.Local.api.Exceptions.customError;
 import com.Local.api.entities.*;
@@ -44,18 +44,18 @@ public class consumerController {
 	public consumerdetails register(@RequestBody consumerdetails newConsumer) throws customError {
 		newConsumer.consumer_id = service.generateId();
 		newConsumer.registration_date = service.getDate();
-	    return service.save(newConsumer);	
+	    return service.register(newConsumer);	
 	}
 	
 	
 	@PutMapping("/changeLocation")
-	public ResponseEntity<String> updateLocation(@RequestBody changeLocation newLocation){
+	public ResponseEntity<String> updateLocation(@RequestBody changeLocation newLocation) throws customError{
 		return service.changeLocation(newLocation);
 	}
 	
 	
 	@GetMapping("/resetPassword/{email}")
-	public ResponseEntity<String> reset(@PathVariable("email") String email) throws customError {
+	public ResponseEntity<otp> reset(@PathVariable("email") String email) throws customError {
 		return service.sendMail(email);
 	}
 	

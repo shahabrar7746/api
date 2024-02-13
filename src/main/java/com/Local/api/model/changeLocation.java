@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class changeLocation {
 	
-	public String id;
+	public String token;
 	public String newLocation;
 
 }
