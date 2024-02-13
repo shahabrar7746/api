@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import com.Local.api.model.otp;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Random;
 
 import com.Local.api.model.Password;
@@ -96,39 +97,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		jwt_repo.save(token);
 		return ResponseEntity.ok(token.token);
 	}
-	private String getDate() {
-		 LocalDate currentDate = LocalDate.now();
-
-	        // Define the format you want for the date string
-	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
-	        // Format the current date using the defined formatter
-	        String dateString = currentDate.format(formatter);
-	      
-	        return dateString;
-	}
-	public String generateId() {
-		String consumerId = null;
-	       StringBuilder uniqueString = new StringBuilder();
-
-	       Random random = new Random();
-	       for (int i = 0; i < 10; i++) {
-	           int index = random.nextInt(characters.length());
-	           uniqueString.append(characters.charAt(index));
-	       }
-	       consumerId = uniqueString.toString();
-	       return consumerId;
-	}
-	private String getOtp() {
-		Random rand = new Random();
-		String num = "1234567890";
-		String otp = "";
-		for(int i = 0;i<6;i++) {
-			otp = otp + rand.nextInt(num.length());
-		}
-		return otp;
-	}
-	public ResponseEntity<String> sendMail(String email) throws customError{
+		public ResponseEntity<String> sendMail(String email) throws customError{
 		String otp = getOtp();
 		
 		consumerdetails consumer = repo.findByemail(email);
@@ -189,6 +158,96 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		deleteToken();
 		return  ResponseEntity.ok(token.token);
 	}
+		@Override
+	public ResponseEntity<String> verify(otp obj) throws customError {
+		otp_storage newOtpObj = repo_otp.findBytoken(obj.token);
+		
+		if(newOtpObj == null || !newOtpObj.otp.equals(obj.otp)) {
+			throw new customError(INCORRECT_OTP, HttpStatus.BAD_REQUEST);
+
+		}
+		jwt token = jwt_repo.findById(obj.token).get();
+		
+		if(obj.token.equals(token.token)) {
+			token.expiry = getTime();
+			jwt_repo.save(token);
+		}else {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+
+		}
+		repo_otp.delete(newOtpObj);
+		  deleteOtp();
+		return ResponseEntity.ok(obj.token);
+		
+		
+		
+	}
+	
+	@Override
+	public ResponseEntity<String> update(Password obj) throws customError {
+		// TODO Auto-generated method stub
+		jwt token = null;
+		try {
+			token = jwt_repo.findById(obj.token).get();
+		}
+		catch (NoSuchElementException e) {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+
+		}
+		
+		consumerdetails consumer = repo.findById(token.id).get();
+		if(consumer == null) {
+			throw new customError(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+		}
+		consumer.password = obj.newPassword;
+		repo.save(consumer);
+		return ResponseEntity.ok(token.token);
+	}
+	private String getDate() {
+		 LocalDate currentDate = LocalDate.now();
+
+	        // Define the format you want for the date string
+	        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+	        // Format the current date using the defined formatter
+	        String dateString = currentDate.format(formatter);
+	      
+	        return dateString;
+	}
+	public String generateId() {
+		String consumerId = null;
+	       StringBuilder uniqueString = new StringBuilder();
+
+	       Random random = new Random();
+	       for (int i = 0; i < 10; i++) {
+	           int index = random.nextInt(characters.length());
+	           uniqueString.append(characters.charAt(index));
+	       }
+	       consumerId = uniqueString.toString();
+	       return consumerId;
+	}
+	private String getOtp() {
+		
+		String otp = "";
+		for(int i = 0;i<6;i++) {
+			otp = otp + rand.nextInt(num.length());
+		}
+		return otp;
+	}
+	private void deleteOtp() {
+		List<otp_storage> otpStorage = repo_otp.findAll();
+		for(int i =0;i<otpStorage.size();i++) {
+			otp_storage otps = otpStorage.get(i);
+			
+			String hour = otps.otp_expiry.substring(0,2);
+			  String currentHour = getTime().substring(0,2);
+			  if(Integer.parseInt(hour) - Integer.parseInt(currentHour) != 0) {
+				  repo_otp.delete(otps);
+			  }
+			  
+		}
+	}
 	private String generateToken()
 	{
 		String token = "";
@@ -223,59 +282,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	        return formattedTime;
 	}
 
-	@Override
-	public ResponseEntity<String> verify(otp obj) throws customError {
-		otp_storage newOtpObj = repo_otp.findBytoken(obj.token);
-		if(newOtpObj == null || !newOtpObj.equals(obj.otp)) {
-			throw new customError(INCORRECT_OTP, HttpStatus.BAD_REQUEST);
 
-		}
-		jwt token = jwt_repo.findById(obj.token).get();
-		
-		if(obj.token.equals(token.token)) {
-			token.expiry = getTime();
-			jwt_repo.save(token);
-		}else {
-			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
 
-		}
-		repo_otp.delete(newOtpObj);
-		  deleteOtp();
-		return ResponseEntity.ok(obj.token);
-		
-		
-		
-	}
-	private void deleteOtp() {
-		List<otp_storage> otpStorage = repo_otp.findAll();
-		for(int i =0;i<otpStorage.size();i++) {
-			otp_storage otps = otpStorage.get(i);
-			
-			String hour = otps.otp_expiry.substring(0,2);
-			  String currentHour = getTime().substring(0,2);
-			  if(Integer.parseInt(hour) - Integer.parseInt(currentHour) != 0) {
-				  repo_otp.delete(otps);
-			  }
-			  
-		}
-	}
 
-	@Override
-	public ResponseEntity<String> update(Password obj) throws customError {
-		// TODO Auto-generated method stub
-		jwt token = jwt_repo.findById(obj.token).get();
-		if(token == null) {
-			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
-
-		}
-		
-		consumerdetails consumer = repo.findById(token.id).get();
-		if(consumer == null) {
-			throw new customError(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
-
-		}
-		consumer.password = obj.newPassword;
-		repo.save(consumer);
-		return ResponseEntity.ok(token.token);
-	}
 }
