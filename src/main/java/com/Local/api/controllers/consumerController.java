@@ -3,8 +3,7 @@ package com.Local.api.controllers;
 
 import java.util.List;
 
-
-
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,13 +16,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.Local.api.model.login;
 import com.Local.api.model.otp;
 import com.Local.api.service.consumerService;
+
+import ch.qos.logback.classic.Logger;
+
 import com.Local.api.Exceptions.customError;
 import com.Local.api.entities.*;
+import com.Local.api.model.Password;
 import 	 com.Local.api.model.changeLocation;
 @RestController
 public class consumerController {
 
-	
+    private static final Logger logger = (Logger) LoggerFactory.getLogger(consumerController.class);
+
 	@Autowired
 	private consumerService service;
 	
@@ -34,14 +38,14 @@ public class consumerController {
 	}
 	@GetMapping("/")
 	public String status(){
-		
+		logger.info("In up status");
 		return "Im up!!";
 	}
 	
 	
 	
 	@PostMapping(path = "/register/consumer")
-	public consumerdetails register(@RequestBody consumerdetails newConsumer) throws customError {
+	public ResponseEntity<String> register(@RequestBody consumerdetails newConsumer) throws customError {
 		
 	    return service.register(newConsumer);	
 	}
@@ -54,7 +58,7 @@ public class consumerController {
 	
 	
 	@GetMapping("/resetPassword/{email}")
-	public ResponseEntity<otp> reset(@PathVariable("email") String email) throws customError {
+	public ResponseEntity<String> reset(@PathVariable("email") String email) throws customError {
 		return service.sendMail(email);
 	}
 	
@@ -62,6 +66,14 @@ public class consumerController {
 	public ResponseEntity<String> login(@RequestBody login logUser) throws customError{
 		return service.doLogin(logUser);
 	}
+	@PutMapping("/otp/verify")
+	public ResponseEntity<String> verify(@RequestBody otp obj) throws customError{
+		return service.verify(obj);
+	}
 	
+	@PutMapping("/newPassword")
+	public ResponseEntity<String> update(@RequestBody Password obj) throws customError{
+		return service.update(obj);
+	}
 	
 }

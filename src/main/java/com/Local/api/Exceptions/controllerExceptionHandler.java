@@ -19,6 +19,7 @@ public class controllerExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	@ExceptionHandler
 	public ResponseEntity<errorMessage> throwError(customError error,WebRequest req){
+		
 		errorMessage message = new errorMessage(error.getStatus(),error.getMessage());
 		return ResponseEntity.status(error.getStatus()).body(message);
 	}

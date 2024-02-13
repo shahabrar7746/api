@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Random;
 
+import com.Local.api.model.Password;
 import 	 com.Local.api.model.changeLocation;
 import com.Local.api.model.login;
 
@@ -18,10 +19,13 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.*;
 import org.springframework.stereotype.Service;
 import com.Local.api.entities.jwt;
+import com.Local.api.entities.otp_storage;
+
 import com.Local.api.Exceptions.customError;
 import com.Local.api.entities.consumerdetails;
 import com.Local.api.repository.consumerRepo;
 import com.Local.api.repository.jwtRepo;
+import com.Local.api.repository.otpRepo;
 
 
 @Service
@@ -33,13 +37,15 @@ public class consumerService implements consumerInterface{
 	@Autowired
 	consumerRepo repo;
 	@Autowired
-	private jwtRepo jwt;
+	private jwtRepo jwt_repo;
 	
+	@Autowired
+	private otpRepo repo_otp;
 	
 	private final jwt token = new jwt();
 	
-	
-
+	private otp_storage otpObj = new otp_storage();
+    private final static String INCORRECT_OTP = "Incorrect Otp";
 	private final otp res = new otp();
 	private final String num = "1234567890";
 private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
@@ -58,7 +64,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	
 	public ResponseEntity<String>  changeLocation(changeLocation location) throws customError{
 		
-		jwt token = jwt.findById(location.token).get();
+		jwt token = jwt_repo.findById(location.token).get();
 		if(token == null) {
 			throw new customError(TOKKEN_EXPIRED,HttpStatus.GATEWAY_TIMEOUT);
 
@@ -70,11 +76,12 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		consumer.consumer_location = location.newLocation;
 		repo.save(consumer);
 		
-		
+		token.expiry = getTime();
+		jwt_repo.save(token);
 		return ResponseEntity.ok(SUCCESS) ;
 		
 	}
-	public consumerdetails register(consumerdetails newConsumer) throws customError {
+	public ResponseEntity<String> register(consumerdetails newConsumer) throws customError {
 		newConsumer.consumer_id = generateId();
 		newConsumer.registration_date = getDate();
 		consumerdetails consumer = repo.findByemail(newConsumer.email);
@@ -82,7 +89,12 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 			throw new customError(EMAIL_IN_USE,HttpStatus.CONFLICT);
 		}
 		repo.save(newConsumer);
-		return newConsumer;
+		
+		token.expiry = getTime();
+		token.id = consumer.consumer_id;
+		token.token = generateToken();
+		jwt_repo.save(token);
+		return ResponseEntity.ok(token.token);
 	}
 	private String getDate() {
 		 LocalDate currentDate = LocalDate.now();
@@ -116,7 +128,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		}
 		return otp;
 	}
-	public ResponseEntity<otp> sendMail(String email) throws customError{
+	public ResponseEntity<String> sendMail(String email) throws customError{
 		String otp = getOtp();
 		
 		consumerdetails consumer = repo.findByemail(email);
@@ -141,9 +153,18 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	       token.id = consumer.consumer_id;
 	       token.token = res.token;
 	       token.type = "AUTH";
-	       jwt.save(token);
+	       jwt_repo.save(token);
+	       
+	       
+	       //saves otp in the database
+	       otpObj.otp = otp;
+	       otpObj.otp_expiry = getTime();
+	       otpObj.token = token.token;
+	       otpObj.token_expiry = token.expiry;
+	       repo_otp.save(otpObj);
+	       
 	       deleteToken();
-			return ResponseEntity.ok(res);
+			return ResponseEntity.ok(token.token);
 	}
 	
 	public ResponseEntity<String> doLogin(login logUser) throws customError{
@@ -162,7 +183,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		token.id = consumer.consumer_id;
 		token.token = generateToken();
 		
-		jwt.save(token);
+		jwt_repo.save(token);
 		
 		
 		deleteToken();
@@ -180,13 +201,13 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		return token;
 	}
 	private void deleteToken() {
-		List<jwt> tokens = jwt.findAll();
+		List<jwt> tokens = jwt_repo.findAll();
 	  for(int i =0;i<tokens.size();i++) {
 		  jwt token = tokens.get(i);
 		  String hour = token.expiry.substring(0,2);
 		  String currentHour = getTime().substring(0,2);
 		  if(Integer.parseInt(hour) - Integer.parseInt(currentHour) != 0) {
-			  jwt.delete(token);
+			  jwt_repo.delete(token);
 		  }
 		  
 	  }
@@ -200,5 +221,61 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	        // Format the current time using the specified format
 	        String formattedTime = currentTime.format(formatter);
 	        return formattedTime;
+	}
+
+	@Override
+	public ResponseEntity<String> verify(otp obj) throws customError {
+		otp_storage newOtpObj = repo_otp.findBytoken(obj.token);
+		if(newOtpObj == null || !newOtpObj.equals(obj.otp)) {
+			throw new customError(INCORRECT_OTP, HttpStatus.BAD_REQUEST);
+
+		}
+		jwt token = jwt_repo.findById(obj.token).get();
+		
+		if(obj.token.equals(token.token)) {
+			token.expiry = getTime();
+			jwt_repo.save(token);
+		}else {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+
+		}
+		repo_otp.delete(newOtpObj);
+		  deleteOtp();
+		return ResponseEntity.ok(obj.token);
+		
+		
+		
+	}
+	private void deleteOtp() {
+		List<otp_storage> otpStorage = repo_otp.findAll();
+		for(int i =0;i<otpStorage.size();i++) {
+			otp_storage otps = otpStorage.get(i);
+			
+			String hour = otps.otp_expiry.substring(0,2);
+			  String currentHour = getTime().substring(0,2);
+			  if(Integer.parseInt(hour) - Integer.parseInt(currentHour) != 0) {
+				  repo_otp.delete(otps);
+			  }
+			  
+		}
+	}
+
+	@Override
+	public ResponseEntity<String> update(Password obj) throws customError {
+		// TODO Auto-generated method stub
+		jwt token = jwt_repo.findById(obj.token).get();
+		if(token == null) {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+
+		}
+		
+		consumerdetails consumer = repo.findById(token.id).get();
+		if(consumer == null) {
+			throw new customError(USER_NOT_FOUND, HttpStatus.NOT_FOUND);
+
+		}
+		consumer.password = obj.newPassword;
+		repo.save(consumer);
+		return ResponseEntity.ok(token.token);
 	}
 }
