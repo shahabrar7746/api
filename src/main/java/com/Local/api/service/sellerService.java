@@ -17,7 +17,7 @@ import java.util.List;
 import ch.qos.logback.classic.turbo.ReconfigureOnChangeFilter;
 
 @Service
-public class sellerService {
+public class sellerService implements sellerInterface{
 
 	
 	

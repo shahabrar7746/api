@@ -25,14 +25,13 @@ import com.Local.api.repository.jwtRepo;
 
 
 @Service
-public class consumerService {
+public class consumerService implements consumerInterface{
 
 	@Autowired
 	 private JavaMailSender emailSender;
 	
 	@Autowired
-	private  consumerRepo repo;
-	
+	consumerRepo repo;
 	@Autowired
 	private jwtRepo jwt;
 	
