@@ -11,6 +11,6 @@ import com.Local.api.entities.sellerdetails;
 public interface sellerRepo extends JpaRepository<sellerdetails,String>{
  
 	
-	
+	public sellerdetails findByemail(String email);
 	
 }
