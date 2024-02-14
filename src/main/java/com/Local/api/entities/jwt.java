@@ -21,5 +21,5 @@ public class jwt {
 	public String id,expiry;
 
 	
-	public String type = "SERVE";
+	public String type = "OPERATION";
 }

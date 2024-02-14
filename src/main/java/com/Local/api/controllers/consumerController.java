@@ -26,7 +26,6 @@ import 	 com.Local.api.model.changeLocation;
 @RestController
 public class consumerController {
 
-    private static final Logger logger = (Logger) LoggerFactory.getLogger(consumerController.class);
 
 	@Autowired
 	private consumerService service;
@@ -38,7 +37,7 @@ public class consumerController {
 	}
 	@GetMapping("/")
 	public String status(){
-		logger.info("In up status");
+		
 		return "Im up!!";
 	}
 	
