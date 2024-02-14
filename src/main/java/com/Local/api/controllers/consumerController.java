@@ -61,7 +61,7 @@ public class consumerController {
 		return service.sendMail(email);
 	}
 	
-	@GetMapping("/login")
+	@PostMapping("/login")
 	public ResponseEntity<String> login(@RequestBody login logUser) throws customError{
 		return service.doLogin(logUser);
 	}
