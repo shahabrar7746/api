@@ -50,7 +50,7 @@ public class consumerController {
 	}
 	
 	
-	@PutMapping("/changeLocation")
+	@PostMapping("/changeLocation")
 	public ResponseEntity<String> updateLocation(@RequestBody changeLocation newLocation) throws customError{
 		return service.changeLocation(newLocation);
 	}
