@@ -92,7 +92,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		repo.save(newConsumer);
 		
 		token.expiry = getTime();
-		token.id = consumer.consumer_id;
+		token.id = newConsumer.consumer_id;
 		token.token = generateToken();
 		jwt_repo.save(token);
 		return ResponseEntity.ok(token.token);
