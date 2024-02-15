@@ -65,12 +65,12 @@ public class consumerController {
 	public ResponseEntity<String> login(@RequestBody login logUser) throws customError{
 		return service.doLogin(logUser);
 	}
-	@PutMapping("/otp/verify")
+	@PostMapping("/otp/verify")
 	public ResponseEntity<String> verify(@RequestBody otp obj) throws customError{
 		return service.verify(obj);
 	}
 	
-	@PutMapping("/newPassword")
+	@PostMapping("/newPassword")
 	public ResponseEntity<String> update(@RequestBody Password obj) throws customError{
 		return service.update(obj);
 	}
