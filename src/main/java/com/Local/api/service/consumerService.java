@@ -202,6 +202,9 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		}
 		consumer.password = obj.newPassword;
 		repo.save(consumer);
+		token.expiry = getTime();
+		token.type = "OPERATION";
+		jwt_repo.save(token);
 		return ResponseEntity.ok(token.token);
 	}
 	private String getDate() {

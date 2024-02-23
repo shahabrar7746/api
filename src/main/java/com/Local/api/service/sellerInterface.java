@@ -10,7 +10,7 @@ import com.Local.api.model.serviceRequest;
 
 public interface sellerInterface {
 	public java.util.List<sellerdetails> findAllSeller();
-	public java.util.List<sellerdetails> getService(serviceRequest request);
+	public java.util.List<sellerdetails> getService(serviceRequest request) throws customError;
 	public ResponseEntity<String> register(sellerdetails seller) throws customError;
 	public ResponseEntity<String> changePassword(String email)  throws customError;
 	public ResponseEntity<String> verify(otp sentOtp) throws customError;

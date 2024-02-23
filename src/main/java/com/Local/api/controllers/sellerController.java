@@ -16,6 +16,7 @@ import com.Local.api.entities.sellerdetails;
 import com.Local.api.model.Password;
 import com.Local.api.model.otp;
 import com.Local.api.model.serviceRequest;
+import com.Local.api.repository.jwtRepo;
 import com.Local.api.service.sellerService;
 
 @RestController
@@ -24,12 +25,15 @@ public class sellerController {
 	@Autowired
 	private sellerService service;
 	
+	
+	
+	
 	@GetMapping("/sellers")
 	public List<sellerdetails> findAllSeller(){
 		return service.findAllSeller();
 	}
 	@PostMapping("/service")
-	public List<sellerdetails> getServices(@RequestBody serviceRequest request){
+	public List<sellerdetails> getServices (@RequestBody serviceRequest request)throws customError{
 		return service.getService(request);
 	}
 	

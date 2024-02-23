@@ -65,7 +65,8 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	private static final String SUCCESS = "Successfull";
 	private final  String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-	
+	@Autowired
+	private jwtRepo tokkens;
 	
 	private String getDate() {
 		 LocalDate currentDate = LocalDate.now();
@@ -151,15 +152,26 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	public java.util.List<sellerdetails> findAllSeller(){
 		return repo.findAll();
 	}
-	public java.util.List<sellerdetails> getService(serviceRequest request){
+	public java.util.List<sellerdetails> getService(serviceRequest request) throws customError{
 		
+		Optional<jwt> optionalTokken = tokkens.findById(request.token);
 		
-		consumerdetails consumer = repo2.findById(request.id).get();
+		if(!optionalTokken.isPresent()) {
+		// throws error if  tokken is valid.
+			throw new customError(TOKKEN_EXPIRED,HttpStatus.BAD_REQUEST);
+		}
+		//proceeds further if  tokken is valid.
+		jwt tokken = optionalTokken.get();
+		tokken.expiry = getTime();//updates tokken expiry;
+		tokkens.save(tokken);
+		request.query = request.query.toLowerCase();// converts requested query to lower case.
+		String id = optionalTokken.get().id;		
+		consumerdetails consumer = repo2.findById(id).get();
 		java.util.List<sellerdetails> list = new LinkedList<>();
 		java.util.List<sellerdetails> sellerList = repo.findAll();
 		for(int i =0;i<sellerList.size();i++) {
 			
-			if(sellerList.get(i).pin_code.equals(consumer.pin_code) && sellerList.get(i).service_type.equals(request.query)) {
+			if(sellerList.get(i).pin_code.equals(consumer.pin_code) && (sellerList.get(i).service_type.contains(request.query) || sellerList.get(i).service_name.contains(request.query))) {
 				list.add(sellerList.get(i));
 			}
 		}

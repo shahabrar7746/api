@@ -5,7 +5,7 @@ public class serviceRequest {
 	
 	
 	
-	public String id;
+	public String token;
 	public String query;
 	
 }
