@@ -192,6 +192,11 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		token.id = seller.seller_id;
 		token.token = generateToken();
 		jwt_repo.save(token);
+		seller.area = seller.area.toLowerCase();
+		seller.seller_name = seller.seller_name.toLowerCase();
+		seller.service_name =  seller.service_name.toLowerCase();
+	seller.state =	seller.state.toLowerCase();
+	seller.service_type = seller.service_type.toLowerCase();
 		repo.save(seller);
 		
 		//tokken cleaning
