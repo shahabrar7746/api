@@ -170,8 +170,10 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		java.util.List<sellerdetails> list = new LinkedList<>();
 		java.util.List<sellerdetails> sellerList = repo.findAll();
 		for(int i =0;i<sellerList.size();i++) {
-			
-			if(sellerList.get(i).pin_code.equals(consumer.pin_code) && (sellerList.get(i).service_type.contains(request.query) || sellerList.get(i).service_name.contains(request.query))) {
+			String curSellerServiceType = sellerList.get(i).service_type.toLowerCase();
+			String curSellerServiceName = sellerList.get(i).service_name.toLowerCase();
+
+			if(sellerList.get(i).pin_code.equals(consumer.pin_code) && (curSellerServiceType.contains(request.query) || curSellerServiceName.contains(request.query))) {
 				list.add(sellerList.get(i));
 			}
 		}
@@ -192,11 +194,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		token.id = seller.seller_id;
 		token.token = generateToken();
 		jwt_repo.save(token);
-		seller.area = seller.area.toLowerCase();
-		seller.seller_name = seller.seller_name.toLowerCase();
-		seller.service_name =  seller.service_name.toLowerCase();
-	seller.state =	seller.state.toLowerCase();
-	seller.service_type = seller.service_type.toLowerCase();
+	
 		repo.save(seller);
 		
 		//tokken cleaning
