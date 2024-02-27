@@ -1,6 +1,7 @@
 package com.Local.api.service;
 
 import org.springframework.http.ResponseEntity;
+import com.Local.api.model.bookOrder;
 
 import com.Local.api.Exceptions.customError;
 import com.Local.api.entities.sellerdetails;
@@ -15,4 +16,5 @@ public interface sellerInterface {
 	public ResponseEntity<String> changePassword(String email)  throws customError;
 	public ResponseEntity<String> verify(otp sentOtp) throws customError;
 	public ResponseEntity<String> reset(Password newPassword) throws customError;
+	public ResponseEntity<String> bookOrder(bookOrder order) throws customError;
 }

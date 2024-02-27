@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.Local.api.Exceptions.customError;
 import com.Local.api.entities.sellerdetails;
 import com.Local.api.model.Password;
+import com.Local.api.model.bookOrder;
 import com.Local.api.model.otp;
 import com.Local.api.model.serviceRequest;
 import com.Local.api.repository.jwtRepo;
@@ -54,5 +55,10 @@ public class sellerController {
 	@PutMapping("/reset/password")
 	public ResponseEntity<String> reset(@RequestBody Password newPassword) throws customError{
 		return service.reset(newPassword);
+	}
+	@PostMapping("/book")
+	public ResponseEntity<String> bookOrder(@RequestBody bookOrder order)throws customError{
+		return service.bookOrder(order);
+		
 	}
 }

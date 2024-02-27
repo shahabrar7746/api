@@ -17,6 +17,7 @@ import com.Local.api.model.otp;
 import com.Local.api.model.serviceRequest;
 import com.Local.api.repository.consumerRepo;
 import com.Local.api.repository.jwtRepo;
+import com.Local.api.repository.orderRepo;
 import com.Local.api.repository.otpRepo;
 import com.Local.api.repository.sellerRepo;
 
@@ -37,6 +38,9 @@ public class sellerService implements sellerInterface{
 
 	@Autowired
 	 private JavaMailSender emailSender;
+	
+	@Autowired
+	private orderRepo ordersRepo;
 	
 	@Autowired
 	private sellerRepo repo;
@@ -291,5 +295,19 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	jwt_repo.save(curTokken);
 	return ResponseEntity.ok(curTokken.token);
 	
+	}
+	@Override
+	public ResponseEntity<String> bookOrder(com.Local.api.model.bookOrder order) throws customError {
+		// TODO Auto-generated method stub
+		orders orderService = new orders();
+		orderService.date = getDate();
+		orderService.time = getTime();
+		orderService.Sellerid = order.id;
+		orderService.Consumerid = jwt_repo.findBytoken(order.token).id;
+		orderService.message = order.message;
+		orderService.status = "REQUESTED";
+		ordersRepo.save(orderService);
+		
+		return ResponseEntity.ok(SUCCESS);
 	}
 }
