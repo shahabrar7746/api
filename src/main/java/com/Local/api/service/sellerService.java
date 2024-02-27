@@ -299,14 +299,24 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	@Override
 	public ResponseEntity<String> bookOrder(com.Local.api.model.bookOrder order) throws customError {
 		// TODO Auto-generated method stub
+		jwt tokken = jwt_repo.findBytoken(order.token);
+		if(tokken == null) {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+
+		}
+		tokken.expiry = getTime();
+		
+		int orderSize = ordersRepo.findAll().size();
 		orders orderService = new orders();
+		orderService.id = orderSize+ 1;
 		orderService.date = getDate();
 		orderService.time = getTime();
 		orderService.Sellerid = order.id;
-		orderService.Consumerid = jwt_repo.findBytoken(order.token).id;
+		orderService.Consumerid = tokken.id;
 		orderService.message = order.message;
 		orderService.status = "REQUESTED";
 		ordersRepo.save(orderService);
+		jwt_repo.save(tokken);
 		
 		return ResponseEntity.ok(SUCCESS);
 	}
