@@ -318,6 +318,6 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		ordersRepo.save(orderService);
 		jwt_repo.save(tokken);
 		
-		return ResponseEntity.ok(SUCCESS);
+		return ResponseEntity.ok(tokken.token);
 	}
 }
