@@ -55,7 +55,13 @@ public class sellerService implements sellerInterface{
 	private otpRepo repo_otp;
 	
 	private final jwt token = new jwt();
+
+	private String WRONG_ORDER_ID = "Provided Order does not found to be true";
 	
+	private String EMAIL_SUBJECT = "Status of Request changed.";
+	
+	
+	private String ORDER_NOT_FOUND = "Your Requested Order does not exists";
 	private otp_storage otpObj = new otp_storage();
     private final static String INCORRECT_OTP = "Incorrect Otp";
 	private final otp res = new otp();
@@ -354,10 +360,82 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 				body.date = orderList.get(i).date;
 				body.message = orderList.get(i).message;
 				body.time = orderList.get(i).time;
+				body.id = orderList.get(i).id;
 				orderBodyList.add(body);
 			}
 		}
+		
+		tokkenObj.expiry = getTime();
+		jwt_repo.save(tokkenObj);
 		deleteToken();
 		return orderBodyList;
+	}
+	@Override
+	public ResponseEntity<String> processRequest(com.Local.api.model.processRequest request) throws customError {
+		// TODO Auto-generated method stub
+		jwt tokkenObj = jwt_repo.findBytoken(request.tokken);
+		//jwt tokkenObj = jwt_repo.findById(request.tokken);
+		if(tokkenObj == null) {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+
+		}
+		
+		sellerdetails seller = repo.findById(tokkenObj.id).get();
+		tokkenObj.expiry = getTime();
+		jwt_repo.save(tokkenObj);
+		if(!ordersRepo.findById(request.orderId).isPresent()) {
+			throw new customError(ORDER_NOT_FOUND, HttpStatus.NOT_FOUND);
+		}
+		orders curOrder = ordersRepo.findById(request.orderId).get();
+		String body = "";
+		if(!curOrder.Sellerid.equals(tokkenObj.id)) {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+
+
+		}
+		if(request.isAccepted) {
+			curOrder.status = "ACCEPTED";
+		body = "Your Service Request, named as " + seller.service_name + " , requested on " +
+			curOrder.date + " has beem Accepted. The service provider will contact you as soon as possible for further process " +
+				"\n Thank you, \n 24Local Private Limited.";
+			
+			
+			
+		}else {
+			body = "We regret to inform you that, your Service Request, named as " + seller.service_name + " , requested on " +
+					curOrder.date + " has beem Rejected by service provider. The service provider will contact you as soon as possible for further process " +
+						"\n Thank you, \n 24Local Private Limited.";
+					
+		curOrder.status = "REJECTED";
+		}
+		
+		
+		consumerdetails consumer = repo2.findById(curOrder.Consumerid).get();
+		
+		sendNotification(consumer.email,EMAIL_SUBJECT,body);
+		ordersRepo.save(curOrder);
+		deleteUnNecessayOrders();
+		return ResponseEntity.ok(request.tokken);
+	}
+	
+	
+	
+	private void deleteUnNecessayOrders() {
+		List<orders> orderList = ordersRepo.findAll();
+		
+		for(int  i =0;i<orderList.size();i++) {
+			orders curOrder = orderList.get(i);
+			if(curOrder.status.equals("COMPLETED") || curOrder.status.equals("REJECTED")) {
+			
+				ordersRepo.delete(curOrder);
+			}
+		}
+		
+	}
+	private void sendNotification(String recipient, String subject, String body) {
+		 SimpleMailMessage message = new SimpleMailMessage();
+		  message.setTo(recipient);
+		   message.setText(body);
+		   emailSender.send(message);
 	}
 }

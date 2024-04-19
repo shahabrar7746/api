@@ -20,6 +20,7 @@ import com.Local.api.model.bookOrder;
 import com.Local.api.model.login;
 import com.Local.api.model.orderBody;
 import com.Local.api.model.otp;
+import com.Local.api.model.processRequest;
 import com.Local.api.model.serviceRequest;
 import com.Local.api.repository.jwtRepo;
 import com.Local.api.service.sellerService;
@@ -75,5 +76,11 @@ public class sellerController {
 	@GetMapping("/orders/{tokken}")
 	public List<orderBody> getOrders(@PathVariable("tokken") String tokken) throws customError{
 		return service.getOrders(tokken);
+	}
+	
+	
+	@PostMapping("/accept/order")
+	public ResponseEntity<String> processOrder(@RequestBody processRequest request) throws customError{
+		return service.processRequest(request);
 	}
 }
