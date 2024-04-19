@@ -59,8 +59,10 @@ public class sellerService implements sellerInterface{
 	private String WRONG_ORDER_ID = "Provided Order does not found to be true";
 	
 	private String EMAIL_SUBJECT = "Status of Request changed.";
-	
-	
+	private String ORDER_MISMATCH = "Your Requested Order conflicts with other orders";
+	private String SELLER_NOT_FOUND = "Seller Does not found";
+	private String SUBJECT_FOR_ORDER_REQUEST = "Looks like Someone Called you!!";
+	private String BODY_FOR_ORDER_REQUEST = "Someone requested for Listed Service on 24Local. Do checkout website for more details";
 	private String ORDER_NOT_FOUND = "Your Requested Order does not exists";
 	private otp_storage otpObj = new otp_storage();
     private final static String INCORRECT_OTP = "Incorrect Otp";
@@ -325,6 +327,13 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		ordersRepo.save(orderService);
 		jwt_repo.save(tokken);
 		
+		
+		if(!repo.findById(order.id).isPresent()) {
+			throw new customError(SELLER_NOT_FOUND,HttpStatus.NOT_FOUND);
+		}
+		sellerdetails seller = repo.findById(order.id).get();
+		
+		sendNotification(seller.email,SUBJECT_FOR_ORDER_REQUEST,BODY_FOR_ORDER_REQUEST);
 		return ResponseEntity.ok(tokken.token);
 	}
 	public ResponseEntity<String> login(login credentials) throws customError{
@@ -389,7 +398,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		orders curOrder = ordersRepo.findById(request.orderId).get();
 		String body = "";
 		if(!curOrder.Sellerid.equals(tokkenObj.id)) {
-			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+			throw new customError(ORDER_MISMATCH, HttpStatus.BAD_REQUEST);
 
 
 		}
@@ -435,6 +444,7 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 	private void sendNotification(String recipient, String subject, String body) {
 		 SimpleMailMessage message = new SimpleMailMessage();
 		  message.setTo(recipient);
+		  message.setSubject(subject);
 		   message.setText(body);
 		   emailSender.send(message);
 	}
