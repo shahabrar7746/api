@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.Local.api.Exceptions.customError;
+import com.Local.api.entities.orders;
 import com.Local.api.entities.sellerdetails;
 import com.Local.api.model.Password;
 import com.Local.api.model.bookOrder;
+import com.Local.api.model.login;
+import com.Local.api.model.orderBody;
 import com.Local.api.model.otp;
 import com.Local.api.model.serviceRequest;
 import com.Local.api.repository.jwtRepo;
@@ -61,5 +64,16 @@ public class sellerController {
 	public ResponseEntity<String> bookOrder(@RequestBody bookOrder order)throws customError{
 		return service.bookOrder(order);
 		
+	}
+	
+	
+	@PostMapping("/auth/login")
+	public ResponseEntity<String> doLogin(@RequestBody login credentials) throws customError{
+		return service.login(credentials);
+	}
+	
+	@GetMapping("/orders/{tokken}")
+	public List<orderBody> getOrders(@PathVariable("tokken") String tokken) throws customError{
+		return service.getOrders(tokken);
 	}
 }

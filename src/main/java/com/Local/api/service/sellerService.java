@@ -1,7 +1,8 @@
 package com.Local.api.service;
 
 
-
+import com.Local.api.model.login;
+import com.Local.api.model.orderBody;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ import com.Local.api.repository.sellerRepo;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -319,5 +320,44 @@ private final String chars = "1234567890ABQWERTYUIOPSDFGHJKLZXCVNM";
 		jwt_repo.save(tokken);
 		
 		return ResponseEntity.ok(tokken.token);
+	}
+	public ResponseEntity<String> login(login credentials) throws customError{
+		sellerdetails seller = repo.findByemail(credentials.emailORnumber);
+		if(seller == null) {
+			throw new customError(EMAIL_NOT_FOUND,HttpStatus.NOT_FOUND);
+		}
+		if(!seller.password.equals(credentials.password)) {
+			throw new customError(INCORRECT_PASSWORD,HttpStatus.BAD_REQUEST);
+		}
+		jwt tokken = new jwt();
+		tokken.expiry = getTime();
+		tokken.id = seller.seller_id;
+		tokken.token = generateToken();
+		tokken.type = "OPERATION";
+		jwt_repo.save(tokken);
+		return ResponseEntity.ok(tokken.token);
+	}
+	public List<orderBody> getOrders(String tokken) throws customError{
+		jwt tokkenObj = jwt_repo.findBytoken(tokken);
+		if(tokkenObj == null) {
+			throw new customError(TOKKEN_EXPIRED, HttpStatus.BAD_REQUEST);
+		}
+		List<orderBody> orderBodyList = new LinkedList<>();
+		List<orders> orderList = ordersRepo.findAll();
+		for(int i =0;i<orderList.size();i++) {
+			if(tokkenObj.id.equals(orderList.get(i).Sellerid)) {
+				consumerdetails consumer = repo2.findById(orderList.get(i).Consumerid).get();
+				orderBody body = new orderBody();
+				body.address = consumer.consumer_location + ", " + consumer.pin_code;
+				body.consumerName = consumer.name;
+				body.email = consumer.email;
+				body.date = orderList.get(i).date;
+				body.message = orderList.get(i).message;
+				body.time = orderList.get(i).time;
+				orderBodyList.add(body);
+			}
+		}
+		deleteToken();
+		return orderBodyList;
 	}
 }
